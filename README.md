@@ -131,7 +131,11 @@ This means the API is never blocked, the user sees an immediate response, and th
   <img width="725" height="548" alt="image" src="https://github.com/user-attachments/assets/7a3a2d56-8b3a-411b-adc7-a9228a587a19" />
 
 - **Dashboard**: Live stats and recent requests at a glance
+  <img width="1907" height="902" alt="image" src="https://github.com/user-attachments/assets/d1d8f19c-b709-4dd0-851b-67c0d6843f4a" />
+
 - **Request list**: Filter by status, priority, and location; paginated table
+  <img width="1903" height="826" alt="image" src="https://github.com/user-attachments/assets/9c6d3229-cdf8-45ea-8a5d-5a7e9b659f8a" />
+
 - **Request detail**: Full workflow actions based on current user role
   - Workers: Submit, Edit (Draft only)
   - Reviewers: Approve, Reject, Fulfill
