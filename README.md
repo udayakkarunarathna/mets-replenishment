@@ -50,7 +50,8 @@ dotnet run
 
 Blazor app runs on **http://localhost:5001**
 
-<img width="1896" height="987" alt="image" src="https://github.com/user-attachments/assets/fdceed67-6959-40d6-befc-b4951170715e" />
+<img width="1896" height="955" alt="image" src="https://github.com/user-attachments/assets/33154ae9-6ddc-43e2-8aaf-e7c5aca3b969" />
+
 
 
 ### Run tests
