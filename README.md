@@ -131,9 +131,11 @@ This means the API is never blocked, the user sees an immediate response, and th
   <img width="725" height="548" alt="image" src="https://github.com/user-attachments/assets/7a3a2d56-8b3a-411b-adc7-a9228a587a19" />
 
 - **Dashboard**: Live stats and recent requests at a glance
+  
   <img width="1907" height="902" alt="image" src="https://github.com/user-attachments/assets/d1d8f19c-b709-4dd0-851b-67c0d6843f4a" />
 
 - **Request list**: Filter by status, priority, and location; paginated table
+  
   <img width="1903" height="826" alt="image" src="https://github.com/user-attachments/assets/9c6d3229-cdf8-45ea-8a5d-5a7e9b659f8a" />
 
 - **Request detail**: Full workflow actions based on current user role
@@ -144,12 +146,15 @@ This means the API is never blocked, the user sees an immediate response, and th
     <img width="1893" height="643" alt="image" src="https://github.com/user-attachments/assets/f111d393-b38e-444b-ace9-1fa86a76152f" />
 
 - **Validation banner**: Spins while stock check runs, updates automatically
+  
   <img width="1887" height="657" alt="image" src="https://github.com/user-attachments/assets/fc8227fe-68e8-43cb-8226-8c1af6a00940" />
 
 - **New Request form**: Multi-line-item form with dynamic add/remove rows
+  
   <img width="1902" height="897" alt="image" src="https://github.com/user-attachments/assets/a0d5e763-6797-4ede-9afd-ac3639beb347" />
 
 - **Dialogs**: Rejection reason dialog, fulfillment quantities dialog
+  
   <img width="1907" height="650" alt="image" src="https://github.com/user-attachments/assets/a1bdf312-9c2e-43fc-aaa5-43b94c3172ab" />
 
   <img width="1902" height="627" alt="image" src="https://github.com/user-attachments/assets/d7c15c1c-664e-425a-9884-1b076732ef18" />
