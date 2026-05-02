@@ -39,8 +39,7 @@ cd METS.Api
 dotnet run
 ```
 
-API runs on **http://localhost:5000**  
-Swagger UI: **http://localhost:5000/swagger**
+API runs on **http://localhost:5000**
 
 ### 2. Start the Blazor UI (separate terminal)
 
@@ -50,6 +49,9 @@ dotnet run
 ```
 
 Blazor app runs on **http://localhost:5001**
+
+<img width="1896" height="987" alt="image" src="https://github.com/user-attachments/assets/fdceed67-6959-40d6-befc-b4951170715e" />
+
 
 ### Run tests
 
