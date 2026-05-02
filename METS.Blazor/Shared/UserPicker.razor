@@ -1,0 +1,57 @@
+@inject MetsApiClient Api
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="4" Class="pa-8">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+            <MudIcon Icon="@Icons.Material.Filled.Factory" Class="mr-2" />
+            METS
+        </MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-6" Color="Color.Secondary">
+            Stock Replenishment Request System
+        </MudText>
+
+        @if (_users is null)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+        }
+        else
+        {
+            <MudText Typo="Typo.h6" Class="mb-3">Select user to continue:</MudText>
+
+            <MudText Typo="Typo.overline" Color="Color.Info">Workers</MudText>
+            <MudStack Row="true" Wrap="Wrap.Wrap" Class="mb-4">
+                @foreach (var user in _users.Where(u => u.Role == "Worker"))
+                {
+                    <MudButton Variant="Variant.Outlined" Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               OnClick="() => OnPicked.InvokeAsync(user)">
+                        @user.Name
+                    </MudButton>
+                }
+            </MudStack>
+
+            <MudText Typo="Typo.overline" Color="Color.Warning">Reviewers</MudText>
+            <MudStack Row="true" Wrap="Wrap.Wrap">
+                @foreach (var user in _users.Where(u => u.Role == "Reviewer"))
+                {
+                    <MudButton Variant="Variant.Outlined" Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.SupervisorAccount"
+                               OnClick="() => OnPicked.InvokeAsync(user)">
+                        @user.Name
+                    </MudButton>
+                }
+            </MudStack>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter] public EventCallback<UserDto> OnPicked { get; set; }
+
+    private List<UserDto>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users = await Api.GetUsersAsync();
+    }
+}

@@ -1,0 +1,211 @@
+@page "/requests/new"
+@inject MetsApiClient Api
+@inject UserSession Session
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<PageTitle>New Request — METS</PageTitle>
+
+<MudBreadcrumbs Items="@(new List<BreadcrumbItem> { new("Requests", "/requests"), new("New Request", null, disabled: true) })" />
+<MudText Typo="Typo.h4" Class="mb-6">
+    <MudIcon Icon="@Icons.Material.Filled.AddCircle" Class="mr-2" />
+    New Replenishment Request
+</MudText>
+
+@if (!Session.IsWorker)
+{
+    <MudAlert Severity="Severity.Warning">Only workers can create requests.</MudAlert>
+    return;
+}
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudPaper Elevation="2" Class="pa-6">
+            <!-- Basic Info -->
+            <MudText Typo="Typo.h6" Class="mb-4">Request Details</MudText>
+
+            <MudTextField @bind-Value="_form.Title"
+                          Label="Title" Required="true"
+                          Placeholder="e.g. Restock M8 Bolts — Assembly Line A"
+                          Variant="Variant.Outlined" Class="mb-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="int" Label="Stock Location" Required="true"
+                               @bind-Value="_form.StockLocationId"
+                               Variant="Variant.Outlined" AnchorOrigin="Origin.BottomLeft">
+                        @if (_locations is not null)
+                        {
+                            @foreach (var loc in _locations)
+                            {
+                                <MudSelectItem Value="@loc.Id">@loc.Code — @loc.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string" Label="Priority" @bind-Value="_form.Priority"
+                               Variant="Variant.Outlined" AnchorOrigin="Origin.BottomLeft">
+                        <MudSelectItem Value="@("Low")">Low</MudSelectItem>
+                        <MudSelectItem Value="@("Normal")">Normal</MudSelectItem>
+                        <MudSelectItem Value="@("Urgent")">Urgent</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudTextField @bind-Value="_form.Notes"
+                          Label="Notes (optional)"
+                          Lines="3"
+                          Placeholder="Any additional context for the reviewer..."
+                          Variant="Variant.Outlined" Class="mb-6" />
+
+            <!-- Line Items -->
+            <MudDivider Class="mb-4" />
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Inventory2" Class="mr-1" />
+                    Line Items
+                </MudText>
+                <MudSpacer />
+                <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddLineItem">
+                    Add Item
+                </MudButton>
+            </MudStack>
+
+            @for (int i = 0; i < _form.LineItems.Count; i++)
+            {
+                var index = i;
+                var item = _form.LineItems[index];
+                <MudPaper Outlined="true" Class="pa-3 mb-3">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Item @(index + 1)</MudText>
+                        <MudSpacer />
+                        @if (_form.LineItems.Count > 1)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                           Color="Color.Error" OnClick="() => RemoveLineItem(index)" />
+                        }
+                    </MudStack>
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="item.ArticleNumber"
+                                          Label="Article #" Required="true"
+                                          Placeholder="e.g. BLT-M8-25"
+                                          Variant="Variant.Outlined" Dense="true"
+                                          Style="font-family:monospace" />
+                        </MudItem>
+                        <MudItem xs="12" sm="8">
+                            <MudTextField @bind-Value="item.Description"
+                                          Label="Description" Required="true"
+                                          Placeholder="e.g. M8x25 Hex Bolt, Stainless"
+                                          Variant="Variant.Outlined" Dense="true" />
+                        </MudItem>
+                        <MudItem xs="6" sm="4">
+                            <MudNumericField T="decimal" @bind-Value="item.RequestedQuantity"
+                                             Label="Quantity" Required="true"
+                                             Min="0.01m" Variant="Variant.Outlined" Dense="true" />
+                        </MudItem>
+                        <MudItem xs="6" sm="4">
+                            <MudTextField @bind-Value="item.Unit"
+                                          Label="Unit" Placeholder="pcs"
+                                          Variant="Variant.Outlined" Dense="true" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+
+            <!-- Form Actions -->
+            <MudStack Row="true" Class="mt-4" Spacing="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           OnClick="SaveDraft" Disabled="_busy">
+                    @if (_busy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                    Save as Draft
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Href="/requests">
+                    Cancel
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+
+    <!-- Tips panel -->
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="1" Class="pa-4">
+            <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-2">Tips</MudText>
+            <MudText Typo="Typo.body2" Class="mb-2">
+                After saving, you can review your request and submit it for approval from the detail page.
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mb-2">
+                <b>Urgent</b> requests are flagged prominently for reviewers.
+            </MudText>
+            <MudText Typo="Typo.body2">
+                Make sure article numbers are correct — they will be validated against central stock.
+            </MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private CreateRequestForm _form = new();
+    private List<StockLocationDto>? _locations;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _locations = await Api.GetLocationsAsync();
+        if (_locations?.Count > 0)
+            _form.StockLocationId = _locations[0].Id;
+    }
+
+    private void AddLineItem() => _form.LineItems.Add(new());
+    private void RemoveLineItem(int index) => _form.LineItems.RemoveAt(index);
+
+    private async Task SaveDraft()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Title) ||
+            _form.StockLocationId == 0 ||
+            _form.LineItems.Any(l => string.IsNullOrWhiteSpace(l.ArticleNumber)))
+        {
+            Snackbar.Add("Please fill in all required fields.", Severity.Warning);
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            var payload = new CreateRequestForm
+            {
+                Title           = _form.Title,
+                Notes           = _form.Notes,
+                Priority = _form.Priority,
+                StockLocationId = _form.StockLocationId,
+                CreatedByUserId = Session.CurrentUser!.Id,
+                LineItems = _form.LineItems.Select(l => new LineItemForm
+                {
+                    ArticleNumber     = l.ArticleNumber,
+                    Description       = l.Description,
+                    RequestedQuantity = l.RequestedQuantity,
+                    Unit              = l.Unit
+                }).ToList()
+            };  
+            
+            // Snackbar.Add(System.Text.Json.JsonSerializer.Serialize(payload), Severity.Info);
+
+            var created = await Api.CreateRequestAsync(payload); 
+            
+            //Snackbar.Add($"created: {created}", Severity.Info);
+
+            Snackbar.Add("Draft saved successfully!", Severity.Success);
+            Nav.NavigateTo($"/requests/{created!.Id}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving request: {ex.Message}", Severity.Error);
+        }
+        finally { _busy = false; }
+    }
+}

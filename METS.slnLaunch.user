@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "METS.Api\\METS.Api.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "METS.Blazor\\METS.Blazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

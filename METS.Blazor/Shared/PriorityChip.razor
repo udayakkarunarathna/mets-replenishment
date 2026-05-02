@@ -1,0 +1,21 @@
+<MudChip T="string" Color="@GetColor()" Size="Size.Small" Icon="@GetIcon()">@Priority</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public string Priority { get; set; } = string.Empty;
+
+    private Color GetColor() => Priority switch
+    {
+        "Low"    => Color.Default,
+        "Normal" => Color.Primary,
+        "Urgent" => Color.Error,
+        _        => Color.Default
+    };
+
+    private string GetIcon() => Priority switch
+    {
+        "Low"    => Icons.Material.Filled.ArrowDownward,
+        "Normal" => Icons.Material.Filled.Remove,
+        "Urgent" => Icons.Material.Filled.PriorityHigh,
+        _        => Icons.Material.Filled.Remove
+    };
+}

@@ -1,0 +1,104 @@
+@inherits LayoutComponentBase
+@inject UserSession Session
+@inject MetsApiClient Api
+@inject NavigationManager Nav
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar Color="Color.Primary" Elevation="2">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                       Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-2">
+            <b>METS</b> - Stock Replenishment
+        </MudText>
+        <MudSpacer />
+
+        @if (Session.IsLoggedIn)
+        {
+            <MudChip T="string"
+                     Color="@(Session.IsReviewer ? Color.Warning : Color.Info)"
+                     Icon="@(Session.IsReviewer ? Icons.Material.Filled.SupervisorAccount : Icons.Material.Filled.Person)"
+                     Class="mr-2">
+                @Session.CurrentUser!.Name (@Session.CurrentUser.Role)
+            </MudChip>
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit"
+                           OnClick="Logout" Title="Switch user" />
+        }
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <MudNavMenu>            
+            @if (Session.IsWorker || Session.IsReviewer)
+            {
+                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                    Dashboard
+                </MudNavLink>
+                <MudNavLink Href="/requests" Icon="@Icons.Material.Filled.List">
+                    All Requests
+                </MudNavLink>
+                @if (Session.IsWorker)
+                {
+                    <MudNavLink Href="/requests/new" Icon="@Icons.Material.Filled.AddCircle">
+                        New Request
+                    </MudNavLink>
+                }
+            } else
+            {
+                <MudNavLink Href="/" Icon="@Icons.Material.Filled.AccountCircle">
+                    User Role
+                </MudNavLink>
+			}
+            <MudDivider Class="my-2" />
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+            @if (!Session.IsLoggedIn)
+            {
+                <UserPicker OnPicked="OnUserPicked" />
+            }
+            else
+            {
+                @Body
+            }
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    protected override void OnInitialized()
+    {
+        Session.OnChange += StateHasChanged;
+    }
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+    private void OnUserPicked(UserDto user)
+    {
+        Session.SetUser(user);
+        try
+        {
+            Nav.NavigateTo("/requests");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);  // prints error
+            throw;
+        }
+    }
+
+    private void Logout()
+    {
+        Session.Clear();
+        Nav.NavigateTo("/");
+    }
+
+    public void Dispose() => Session.OnChange -= StateHasChanged;
+}

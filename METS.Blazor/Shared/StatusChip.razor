@@ -1,0 +1,27 @@
+@* Renders a colored chip for request status *@
+
+<MudChip T="string" Color="@GetColor()" Size="Size.Small" Icon="@GetIcon()">@Status</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public string Status { get; set; } = string.Empty;
+
+    private Color GetColor() => Status switch
+    {
+        "Draft"     => Color.Default,
+        "Submitted" => Color.Info,
+        "Approved"  => Color.Success,
+        "Rejected"  => Color.Error,
+        "Fulfilled" => Color.Tertiary,
+        _           => Color.Default
+    };
+
+    private string GetIcon() => Status switch
+    {
+        "Draft"     => Icons.Material.Filled.Edit,
+        "Submitted" => Icons.Material.Filled.HourglassTop,
+        "Approved"  => Icons.Material.Filled.CheckCircle,
+        "Rejected"  => Icons.Material.Filled.Cancel,
+        "Fulfilled" => Icons.Material.Filled.Inventory,
+        _           => Icons.Material.Filled.Circle
+    };
+}

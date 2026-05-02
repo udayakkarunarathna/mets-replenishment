@@ -1,0 +1,87 @@
+@inject MetsApiClient Api
+@inject UserSession Session
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Inventory" Class="mr-2" Color="Color.Tertiary" />
+            Mark Request #@RequestId as Fulfilled
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+            Enter the actual quantities fulfilled for each line item.
+        </MudText>
+        @foreach (var item in _fulfillItems)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3" Spacing="2">
+                <MudStack Spacing="0" Style="flex:1">
+                    <MudText Typo="Typo.caption" Style="font-family:monospace">@item.ArticleNumber</MudText>
+                    <MudText Typo="Typo.body2">@item.Description</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        Requested: @item.RequestedQuantity @item.Unit
+                    </MudText>
+                </MudStack>
+                <MudNumericField T="decimal" @bind-Value="item.FulfilledQty"
+                                 Label="Fulfilled" Variant="Variant.Outlined"
+                                 Min="0" Style="width:130px" Dense="true" />
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled"
+                   OnClick="Confirm" Disabled="_busy">
+            @if (_busy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+            Confirm Fulfillment
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public int RequestId { get; set; }
+    [Parameter] public List<LineItemDto> LineItems { get; set; } = [];
+
+    private List<FulfillItemVm> _fulfillItems = [];
+    private bool _busy;
+
+    protected override void OnInitialized()
+    {
+        _fulfillItems = LineItems.Select(l => new FulfillItemVm
+        {
+            LineItemId      = l.Id,
+            ArticleNumber   = l.ArticleNumber,
+            Description     = l.Description,
+            RequestedQuantity = l.RequestedQuantity,
+            Unit            = l.Unit,
+            FulfilledQty    = l.RequestedQuantity // pre-fill with requested qty
+        }).ToList();
+    }
+
+    private async Task Confirm()
+    {
+        _busy = true;
+        var payload = _fulfillItems.Select(i => new
+        {
+            lineItemId        = i.LineItemId,
+            fulfilledQuantity = i.FulfilledQty
+        }).Cast<object>().ToList();
+
+        await Api.FulfillRequestAsync(RequestId, payload);
+        _busy = false;
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private class FulfillItemVm
+    {
+        public int     LineItemId        { get; set; }
+        public string  ArticleNumber     { get; set; } = string.Empty;
+        public string  Description       { get; set; } = string.Empty;
+        public decimal RequestedQuantity { get; set; }
+        public string  Unit              { get; set; } = string.Empty;
+        public decimal FulfilledQty      { get; set; }
+    }
+}

@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|METS.Api\\METS.Api.csproj|c:\\users\\udaya\\desktop\\cv\\applied\\hitachi\\sds\\mets-stockreplenishment\\mets\\mets.api\\services\\replenishmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|METS.Api\\METS.Api.csproj|solutionrelative:mets.api\\services\\replenishmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C3D4E5F6-A7B8-9012-CDEF-123456789012}|METS.Tests\\METS.Tests.csproj|c:\\users\\udaya\\desktop\\cv\\applied\\hitachi\\sds\\mets-stockreplenishment\\mets\\mets.tests\\replenishmentservicetests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C3D4E5F6-A7B8-9012-CDEF-123456789012}|METS.Tests\\METS.Tests.csproj|solutionrelative:mets.tests\\replenishmentservicetests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ReplenishmentService.cs",
+              "DocumentMoniker": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\METS.Api\\Services\\ReplenishmentService.cs",
+              "RelativeDocumentMoniker": "METS.Api\\Services\\ReplenishmentService.cs",
+              "ToolTip": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\METS.Api\\Services\\ReplenishmentService.cs",
+              "RelativeToolTip": "METS.Api\\Services\\ReplenishmentService.cs",
+              "ViewState": "AgIAAMkAAAAAAAAAAAAmwNsAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T13:37:09.131Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ReplenishmentServiceTests.cs",
+              "DocumentMoniker": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\METS.Tests\\ReplenishmentServiceTests.cs",
+              "RelativeDocumentMoniker": "METS.Tests\\ReplenishmentServiceTests.cs",
+              "ToolTip": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\METS.Tests\\ReplenishmentServiceTests.cs",
+              "RelativeToolTip": "METS.Tests\\ReplenishmentServiceTests.cs",
+              "ViewState": "AgIAANkAAAAAAAAAAAAEwOUAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-02T12:58:19.53Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

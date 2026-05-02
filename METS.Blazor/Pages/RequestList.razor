@@ -1,0 +1,175 @@
+@page "/requests"
+@inject MetsApiClient Api
+@inject NavigationManager Nav
+@inject UserSession Session
+
+<PageTitle>Requests — METS</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">
+        <MudIcon Icon="@Icons.Material.Filled.List" Class="mr-2" />
+        Replenishment Requests
+    </MudText>
+    <MudSpacer />
+    @if (Session.IsWorker)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/requests/new">
+            New Request
+        </MudButton>
+    }
+</MudStack>
+
+<!-- Filters -->
+<MudPaper Elevation="1" Class="pa-4 mb-4">
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="string" Label="Status" @bind-Value="_statusFilter"
+                       Clearable="true" Dense="true" AnchorOrigin="Origin.BottomLeft">
+                @foreach (var s in new[] { "Draft","Submitted","Approved","Rejected","Fulfilled" })
+                {
+                    <MudSelectItem Value="@s">@s</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="string" Label="Priority" @bind-Value="_priorityFilter"
+                       Clearable="true" Dense="true" AnchorOrigin="Origin.BottomLeft">
+                @foreach (var p in new[] { "Low","Normal","Urgent" })
+                {
+                    <MudSelectItem Value="@p">@p</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="int?" Label="Location" @bind-Value="_locationFilter"
+                       Clearable="true" Dense="true" AnchorOrigin="Origin.BottomLeft">
+                @if (_locations is not null)
+                {
+                    @foreach (var loc in _locations)
+                    {
+                        <MudSelectItem Value="@((int?)loc.Id)">@loc.Name</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+    <MudStack Row="true" Class="mt-3">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.FilterList"
+                   OnClick="ApplyFilters">
+            Apply Filters
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Clear"
+                   OnClick="ClearFilters">
+            Clear
+        </MudButton>
+    </MudStack>
+</MudPaper>
+
+<!-- Table -->
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_result is null || _result.Items.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">No requests match the selected filters.</MudAlert>
+}
+else
+{
+    <MudPaper Elevation="1">
+        <MudTable Items="_result.Items" Dense="true" Hover="true" T="RequestSummaryDto"
+                  RowClick="@((TableRowClickEventArgs<RequestSummaryDto> args) => Nav.NavigateTo($"/requests/{args.Item.Id}"))">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<RequestSummaryDto,object>(x=>x.Id)">ID</MudTableSortLabel></MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Priority</MudTh>
+                <MudTh>Location</MudTh>
+                <MudTh>Created By</MudTh>
+                <MudTh>Created</MudTh>
+                <MudTh>More</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">
+                    <MudLink Href="@($"/requests/{context.Id}")">#@context.Id</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Title">
+                    <MudText Style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        @context.Title
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Status"><StatusChip Status="@context.Status" /></MudTd>
+                <MudTd DataLabel="Priority"><PriorityChip Priority="@context.Priority" /></MudTd>
+                <MudTd DataLabel="Location">@context.Location</MudTd>
+                <MudTd DataLabel="Created By">@context.CreatedBy</MudTd>
+                <MudTd DataLabel="Created">@context.CreatedAt.ToLocalTime().ToString("dd MMM HH:mm")</MudTd>
+                <MudTd DataLabel="More">
+                    <MudButton Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.NavigateNext" Size="Size.Small"
+                               Href="@($"/requests/{context.Id}")">
+                        More
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+
+    <!-- Pagination -->
+    @if (_result.TotalPages > 1)
+    {
+        <MudStack Row="true" JustifyContent="JustifyContent.Center" Class="mt-4">
+            <MudPagination Count="_result.TotalPages" @bind-Selected="_page"
+                           Color="Color.Primary" />
+        </MudStack>
+    }
+    <MudText Typo="Typo.caption" Class="mt-2" Color="Color.Secondary">
+        Showing @_result.Items.Count of @_result.TotalCount requests
+    </MudText>
+}
+
+@code {
+    private PagedResult<RequestSummaryDto>? _result;
+    private List<StockLocationDto>? _locations;
+    private bool _loading = true;
+    private string? _statusFilter;
+    private string? _priorityFilter;
+    private int? _locationFilter;
+    private int _page = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _locations = await Api.GetLocationsAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _result = await Api.GetRequestsAsync(_statusFilter, _priorityFilter, _locationFilter, _page);
+        _loading = false;
+    }
+
+    private async Task ApplyFilters()
+    {
+        _page = 1;
+        await LoadAsync();
+    }
+
+    private async Task ClearFilters()
+    {
+        _statusFilter = null;
+        _priorityFilter = null;
+        _locationFilter = null;
+        _page = 1;
+        await LoadAsync();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _page = page;
+        await LoadAsync();
+    }
+}

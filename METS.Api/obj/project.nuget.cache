@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "dgSpecHash": "vEUXmyJ3mDk=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\udaya\\Desktop\\CV\\Applied\\HITACHI\\SDS\\METS-StockReplenishment\\METS\\METS.Api\\METS.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.0-preview.3.25172.1\\microsoft.aspnetcore.openapi.10.0.0-preview.3.25172.1.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.data.sqlite.core\\9.0.4\\microsoft.data.sqlite.core.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.4\\microsoft.entityframeworkcore.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.4\\microsoft.entityframeworkcore.abstractions.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\9.0.4\\microsoft.entityframeworkcore.analyzers.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.inmemory\\9.0.4\\microsoft.entityframeworkcore.inmemory.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\9.0.4\\microsoft.entityframeworkcore.relational.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite\\9.0.4\\microsoft.entityframeworkcore.sqlite.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite.core\\9.0.4\\microsoft.entityframeworkcore.sqlite.core.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.extensions.dependencymodel\\9.0.4\\microsoft.extensions.dependencymodel.9.0.4.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\microsoft.openapi\\2.0.0-preview.11\\microsoft.openapi.2.0.0-preview.11.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.10\\sqlitepclraw.bundle_e_sqlite3.2.1.10.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\sqlitepclraw.core\\2.1.10\\sqlitepclraw.core.2.1.10.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.10\\sqlitepclraw.lib.e_sqlite3.2.1.10.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.10\\sqlitepclraw.provider.e_sqlite3.2.1.10.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\swashbuckle.aspnetcore\\7.3.1\\swashbuckle.aspnetcore.7.3.1.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\7.3.1\\swashbuckle.aspnetcore.swagger.7.3.1.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\7.3.1\\swashbuckle.aspnetcore.swaggergen.7.3.1.nupkg.sha512",
+    "C:\\Users\\udaya\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\7.3.1\\swashbuckle.aspnetcore.swaggerui.7.3.1.nupkg.sha512"
+  ],
+  "logs": []
+}

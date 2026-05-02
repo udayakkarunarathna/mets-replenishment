@@ -1,0 +1,315 @@
+@page "/requests/{Id:int}"
+@inject MetsApiClient Api
+@inject UserSession Session
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Nav
+@implements IDisposable
+
+<PageTitle>Request #@Id — METS</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else if (_request is null)
+{
+    <MudAlert Severity="Severity.Error">Request #@Id not found.</MudAlert>
+}
+else
+{
+    <!-- Header -->
+    <MudStack Row="true" AlignItems="AlignItems.Start" Class="mb-4" Wrap="Wrap.Wrap">
+        <MudStack Spacing="1">
+            <MudBreadcrumbs Items="_crumbs" />
+            <MudText Typo="Typo.h4">@_request.Title</MudText>
+            <MudStack Row="true" Spacing="2">
+                <StatusChip Status="@_request.Status" />
+                <PriorityChip Priority="@_request.Priority" />
+            </MudStack>
+        </MudStack>
+        <MudSpacer />
+        <!-- Action Buttons -->
+        <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap">
+            @if (_request.Status == "Draft" && Session.IsWorker &&
+                 Session.CurrentUser?.Id == _request.CreatedBy.Id)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Send"
+                           OnClick="SubmitRequest" Disabled="_actionBusy">
+                    Submit for Approval
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Href="@($"/requests/{Id}/edit")">
+                    Edit
+                </MudButton>
+            }
+            @if (_request.Status == "Submitted" && Session.IsReviewer)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                           OnClick="ApproveRequest" Disabled="_actionBusy">
+                    Approve
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Cancel"
+                           OnClick="OpenRejectDialog" Disabled="_actionBusy">
+                    Reject
+                </MudButton>
+            }
+            @if (_request.Status == "Approved" && Session.IsReviewer)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Tertiary"
+                           StartIcon="@Icons.Material.Filled.Inventory"
+                           OnClick="OpenFulfillDialog" Disabled="_actionBusy">
+                    Mark Fulfilled
+                </MudButton>
+            }
+        </MudStack>
+    </MudStack>
+
+    <MudGrid>
+        <!-- Left column: details -->
+        <MudItem xs="12" md="8">
+            <!-- Validation banner (shown while Submitted) -->
+            @if (_request.Status == "Submitted")
+            {
+                @if (_request.ValidationStatus == "Pending")
+                {
+                    <MudAlert Severity="Severity.Info" Class="mb-4" Icon="@Icons.Material.Filled.HourglassTop">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Color="Color.Info" />
+                            <MudText>Running stock availability check... This may take a few seconds.</MudText>
+                        </MudStack>
+                    </MudAlert>
+                }
+                else if (_request.ValidationStatus == "Passed")
+                {
+                    <MudAlert Severity="Severity.Success" Class="mb-4" Icon="@Icons.Material.Filled.CheckCircle">
+                        <b>Stock check passed.</b> @_request.ValidationMessage
+                    </MudAlert>
+                }
+                else if (_request.ValidationStatus == "Failed")
+                {
+                    <MudAlert Severity="Severity.Warning" Class="mb-4" Icon="@Icons.Material.Filled.Warning">
+                        <b>Stock check flagged an issue.</b> @_request.ValidationMessage
+                    </MudAlert>
+                }
+            }
+
+            <!-- Rejection reason -->
+            @if (_request.Status == "Rejected" && _request.RejectionReason is not null)
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4" Icon="@Icons.Material.Filled.Cancel">
+                    <b>Rejection reason:</b> @_request.RejectionReason
+                </MudAlert>
+            }
+
+            <!-- Notes -->
+            @if (!string.IsNullOrWhiteSpace(_request.Notes))
+            {
+                <MudPaper Elevation="1" Class="pa-4 mb-4">
+                    <MudText Typo="Typo.overline" Color="Color.Secondary">Notes</MudText>
+                    <MudText>@_request.Notes</MudText>
+                </MudPaper>
+            }
+
+            <!-- Line Items -->
+            <MudText Typo="Typo.h6" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Class="mr-1" />
+                Line Items
+            </MudText>
+            <MudPaper Elevation="1" Class="mb-4">
+                <MudTable Items="_request.LineItems" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Article #</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh Style="text-align:right">Requested</MudTh>
+                        <MudTh>Unit</MudTh>
+                        @if (_request.Status == "Fulfilled")
+                        {
+                            <MudTh Style="text-align:right">Fulfilled</MudTh>
+                        }
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Article #">
+                            <MudText Style="font-family:monospace;font-size:0.85rem;">@context.ArticleNumber</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Description">@context.Description</MudTd>
+                        <MudTd DataLabel="Requested" Style="text-align:right">@context.RequestedQuantity</MudTd>
+                        <MudTd DataLabel="Unit">@context.Unit</MudTd>
+                        @if (_request.Status == "Fulfilled")
+                        {
+                            <MudTd DataLabel="Fulfilled" Style="text-align:right">
+                                <MudText Color="@(context.FulfilledQuantity >= context.RequestedQuantity ? Color.Success : Color.Warning)">
+                                    @(context.FulfilledQuantity?.ToString() ?? "—")
+                                </MudText>
+                            </MudTd>
+                        }
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Right column: metadata -->
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="1" Class="pa-4">
+                <MudText Typo="Typo.overline" Color="Color.Secondary" Class="mb-3">Request Details</MudText>
+                <MudStack Spacing="2">
+                    <DetailRow Label="Location" Value="@($"{_request.Location.Code} — {_request.Location.Name}")" />
+                    <DetailRow Label="Created By" Value="@_request.CreatedBy.Name" />
+                    @if (_request.ReviewedBy is not null)
+                    {
+                        <DetailRow Label="Reviewed By" Value="@_request.ReviewedBy.Name" />
+                    }
+                    <MudDivider />
+                    <DetailRow Label="Created" Value="@_request.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")" />
+                    @if (_request.SubmittedAt.HasValue)
+                    {
+                        <DetailRow Label="Submitted" Value="@_request.SubmittedAt.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")" />
+                    }
+                    @if (_request.ReviewedAt.HasValue)
+                    {
+                        <DetailRow Label="Reviewed" Value="@_request.ReviewedAt.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")" />
+                    }
+                    @if (_request.FulfilledAt.HasValue)
+                    {
+                        <DetailRow Label="Fulfilled" Value="@_request.FulfilledAt.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")" />
+                    }
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private RequestDetailDto? _request;
+    private bool _loading = true;
+    private bool _actionBusy;
+    private CancellationTokenSource? _pollCts;
+
+    private List<BreadcrumbItem> _crumbs =>
+    [
+        new("Requests", "/requests"),
+        new($"#{Id}", null, disabled: true)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+
+        // Start polling if validation is pending
+        if (_request?.Status == "Submitted" && _request.ValidationStatus == "Pending")
+            StartPolling();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _request = await Api.GetRequestAsync(Id);
+        _loading = false;
+    }
+
+    // ── Polling ────────────────────────────────────────────────────────────
+
+    private void StartPolling()
+    {
+        _pollCts = new CancellationTokenSource();
+        _ = PollValidationAsync(_pollCts.Token);
+    }
+
+    private async Task PollValidationAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            await Task.Delay(2500, ct);
+            if (ct.IsCancellationRequested) break;
+
+            var result = await Api.GetValidationAsync(Id);
+            if (result?.ValidationStatus != "Pending")
+            {
+                // Update local state without full reload
+                if (_request is not null)
+                {
+                    _request = _request with
+                    {
+                        ValidationStatus = result!.ValidationStatus,
+                        ValidationMessage = result.ValidationMessage
+                    };
+                }
+                await InvokeAsync(StateHasChanged);
+                break; // Stop polling
+            }
+        }
+    }
+
+    // ── Actions ────────────────────────────────────────────────────────────
+
+    private async Task SubmitRequest()
+    {
+        _actionBusy = true;
+        try
+        {
+            _request = await Api.SubmitRequestAsync(Id, Session.CurrentUser!.Id);
+            Snackbar.Add("Request submitted! Stock check is running in the background.", Severity.Success);
+            StartPolling();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally { _actionBusy = false; }
+    }
+
+    private async Task ApproveRequest()
+    {
+        _actionBusy = true;
+        try
+        {
+            _request = await Api.ApproveRequestAsync(Id, Session.CurrentUser!.Id);
+            Snackbar.Add("Request approved successfully.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally { _actionBusy = false; }
+    }
+
+    private async Task OpenRejectDialog()
+    {
+        var parameters = new DialogParameters<RejectDialog> { { x => x.RequestId, Id } };
+        var dialog = await DialogService.ShowAsync<RejectDialog>("Reject Request", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+            Snackbar.Add("Request rejected.", Severity.Warning);
+        }
+    }
+
+    private async Task OpenFulfillDialog()
+    {
+        var parameters = new DialogParameters<FulfillDialog>
+        {
+            { x => x.RequestId, Id },
+            { x => x.LineItems, _request!.LineItems }
+        };
+        var dialog = await DialogService.ShowAsync<FulfillDialog>("Mark as Fulfilled", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+            Snackbar.Add("Request marked as fulfilled!", Severity.Success);
+        }
+    }
+
+    public void Dispose()
+    {
+        _pollCts?.Cancel();
+        _pollCts?.Dispose();
+    }
+}

@@ -1,0 +1,93 @@
+@page "/"
+@inject MetsApiClient Api
+@inject UserSession Session
+
+<PageTitle>Dashboard — METS</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">
+    <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="mr-2" />
+    Dashboard
+</MudText>
+<MudText Typo="Typo.subtitle1" Class="mb-6" Color="Color.Secondary">
+    Welcome, @Session.CurrentUser?.Name. Here's an overview of stock replenishment activity.
+</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else
+{
+    <!-- Stats Cards -->
+    <MudGrid Class="mb-6">
+        @foreach (var stat in _stats)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Elevation="2" Class="pa-4">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@stat.Icon" Color="@stat.Color" Size="Size.Large" />
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.h4">@stat.Count</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@stat.Label</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+
+    <!-- Recent requests -->
+    <MudText Typo="Typo.h6" Class="mb-3">Recent Requests</MudText>
+    <MudPaper Elevation="1">
+        <MudTable Items="_recent" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Priority</MudTh>
+                <MudTh>Location</MudTh>
+                <MudTh>Created</MudTh>
+                <MudTh>More</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">
+                    <MudLink Href="@($"/requests/{context.Id}")">#@context.Id</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Status"><StatusChip Status="@context.Status" /></MudTd>
+                <MudTd DataLabel="Priority"><PriorityChip Priority="@context.Priority" /></MudTd>
+                <MudTd DataLabel="Location">@context.Location</MudTd>
+                <MudTd DataLabel="Created">@context.CreatedAt.ToLocalTime().ToString("dd MMM HH:mm")</MudTd>
+                <MudTd DataLabel="More">
+                    <MudButton Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.NavigateNext" Size="Size.Small"
+                               Href="@($"/requests/{context.Id}")"> 
+                        More
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    private bool _loading = true;
+    private List<RequestSummaryDto> _recent = [];
+    private List<(string Label, int Count, string Icon, Color Color)> _stats = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Api.GetRequestsAsync(pageSize: 100);
+        if (result is not null)
+        {
+            _recent = result.Items.Take(8).ToList();
+            _stats =
+            [
+                ("Draft",     result.Items.Count(r => r.Status == "Draft"),     Icons.Material.Filled.Edit,          Color.Default),
+                ("Submitted", result.Items.Count(r => r.Status == "Submitted"), Icons.Material.Filled.HourglassTop,  Color.Info),
+                ("Approved",  result.Items.Count(r => r.Status == "Approved"),  Icons.Material.Filled.CheckCircle,   Color.Success),
+                ("Fulfilled", result.Items.Count(r => r.Status == "Fulfilled"), Icons.Material.Filled.Inventory,     Color.Tertiary),
+            ];
+        }
+        _loading = false;
+    }
+}

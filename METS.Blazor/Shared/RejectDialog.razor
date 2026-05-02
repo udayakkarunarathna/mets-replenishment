@@ -1,0 +1,47 @@
+@inject MetsApiClient Api
+@inject UserSession Session
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" Color="Color.Error" />
+            Reject Request #@RequestId
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="_reason"
+                      Label="Rejection Reason"
+                      Placeholder="Explain why this request is being rejected..."
+                      Lines="4"
+                      Required="true"
+                      Variant="Variant.Outlined"
+                      Class="mt-2" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled"
+                   OnClick="Confirm" Disabled="@(string.IsNullOrWhiteSpace(_reason) || _busy)">
+            @if (_busy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+            Reject
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public int RequestId { get; set; }
+
+    private string _reason = string.Empty;
+    private bool _busy;
+
+    private async Task Confirm()
+    {
+        if (string.IsNullOrWhiteSpace(_reason)) return;
+        _busy = true;
+        await Api.RejectRequestAsync(RequestId, Session.CurrentUser!.Id, _reason);
+        _busy = false;
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
