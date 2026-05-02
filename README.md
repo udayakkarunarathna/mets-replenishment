@@ -128,6 +128,8 @@ This means the API is never blocked, the user sees an immediate response, and th
 ## 🖥️ UI Features
 
 - **Role picker**: Select a Worker or Reviewer identity on startup (no auth required)
+  <img width="725" height="548" alt="image" src="https://github.com/user-attachments/assets/7a3a2d56-8b3a-411b-adc7-a9228a587a19" />
+
 - **Dashboard**: Live stats and recent requests at a glance
 - **Request list**: Filter by status, priority, and location; paginated table
 - **Request detail**: Full workflow actions based on current user role
